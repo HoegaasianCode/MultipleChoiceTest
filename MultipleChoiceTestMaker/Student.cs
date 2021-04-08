@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,139 +7,52 @@ namespace MultipleChoiceTestMaker
     public class Student : IStudent
     {
         public string[] TestsTaken { get; set; }
-        private ITestPaper ITestPaper;
-        private string[] Answers;
-        private List<ITestPaper> TestPapers = new();
-        private ITestPaper[] PaperArray;
-        private string[] PaperArray1;
+        private TestPaper _testPaper;
+        private string[] _answers;
+        private readonly List<string> ResultList;
 
-
-        private ITestPaper LastCase;
-        private double CorrectAnswers;
-        private double Percentage;
-        private List<string> ResultList;
-
-
-        public void TakeTest(ITestPaper paper, string[] answers)
+        public Student()
         {
-            ITestPaper = paper;
-            Answers = answers;
-            TestPapers.Add(ITestPaper);
+            TestsTaken = new string[] { "No", " ", "Tests", " ", "Taken" };
+            ResultList = new();
         }
 
-        public void PaperListToArray()
+        public void TakeTest(TestPaper paper, string[] answers)
         {
-            PaperArray = TestPapers.ToArray();
+            _testPaper = paper;
+            _answers = answers;
+            CalcPercentage();
         }
 
-        public void ShiftSubjectArray()
-        { 
-            List<string> stringBoi = new();
-            ITestPaper[] testPaperArray1 = PaperArray;
-            for (int i = 1; i < testPaperArray1.Length; i++)
-            {
-                ITestPaper s = testPaperArray1[i];
-                stringBoi.Add(s.Subject);
-            }
-            string offsetLength = "å";
-            stringBoi.Add(offsetLength);
-            PaperArray1 = stringBoi.ToArray();
-        }
-
-        public void IsOddLengthSubjectArray()
-        {
-            if (PaperArray.Length % 2 != 0)
-            {
-                Array.Reverse(PaperArray);
-                ITestPaper lastPaper = PaperArray[0];
-
-                TestPapers.RemoveAt(0);
-                Array.Reverse(PaperArray);
-            }
-
-        }
-
-        // For odd-length subject-arrays: last case stowed away due to pairwise
-        // iteration in SortSubjectStrings().
-
-        public void SortSubjectStrings()
-        {
-            for (int i = 0; i < PaperArray.Length; i += 2)
-            {
-                ITestPaper result1 = PaperArray[i];
-                string one = result1.Subject;
-                string result2 = PaperArray1[i];
-
-                if (one[0] < result2[0])
-                {
-                    result2.Add(result1);
-                    continue;
-                }
-                if (one[0] > result2[0])
-                {
-                    result2.Add(result2);
-                    continue;
-                }
-                if (one[0] == result2[0]) SortWithinSubjectString(one, result2);
-            }
-        }
-
-        private void SortWithinSubjectString(string s1, string s2) // "Cabc, Cabc, Cabd" .... 
-        {
-            for (int i = 0; i < s1.Length; i++)
-            {
-                char char1 = s1[i];
-                char char2 = s2[i];
-                if (char1 == char2) continue;
-                if (char1 < char2)
-                {
-                    StringList2.Add(s1);
-                    continue;
-                }
-                if (char1 < char2)
-                {
-                    StringList2.Add(s1);
-                    continue;
-                }
-            }
-        }
-
-        public void CompareLastValueToHighest()
-        {
-
-        }
-
-        public void CountCorrectAnswers()
+        private void CalcPercentage()
         {
             int j = 0;
-            for(int i = 0; i < Answers.Length; i++)
+            for(int i = 0; i < _answers.Length; i++)
             {
-                //string answer = TestPapers[i];
-                //string correctAnswer = MarkScheme[i];
-                //if(answer == correctAnswer) j++;
-                //else continue;
+                string answer = _answers[i];
+                string correctAnwer = _testPaper.MarkScheme[i];
+                if (answer == correctAnwer) j++;
             }
-            CorrectAnswers = j;
+            double percentage = Math.Round((double)j / _testPaper.MarkScheme.Length * 100, 0);
+            BuildString(percentage);
         }
 
-        public void CalcPercentage()
+        private void BuildString(double percentage)
         {
-            //Percentage = Math.Round(CorrectAnswers / MarkScheme.Length * 100, 0);
-        }
-
-
-        public void BuildString()
-        {
-            string s;
+            string result;
             string passedText = "Not Passed!";
-            string percentText = Percentage.ToString() + '%';
-            int passMark = Convert.ToInt32(PassMark.Remove(PassMark.Length - 1));
-            if (Percentage > passMark) passedText = "Passed!";
-            if (Answers == null) s = "No tests taken";
-            else s = ITestPaper.Subject + ':' + ' ' + passedText + ' ' + percentText;
-            ResultList.Add(s);
+            string percentText = percentage.ToString() + '%';
+            int passMark = Convert.ToInt32(_testPaper.PassMark.Remove(_testPaper.PassMark.Length - 1));
+            if (percentage > passMark) passedText = "Passed!";
+            result = _testPaper.Subject + ':' + ' ' + passedText + ' ' + percentText;
+            ResultList.Add(result);
         }
 
-
+        public void ListToSortedArray()
+        {
+            string[] stringArray = ResultList.ToArray();
+            Array.Sort(stringArray);
+            TestsTaken = stringArray;
+        }
     }
 }
