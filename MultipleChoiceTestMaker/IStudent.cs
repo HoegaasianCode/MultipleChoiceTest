@@ -9,6 +9,6 @@ namespace MultipleChoiceTestMaker
     interface IStudent
     {
         string[] TestsTaken { get; set; }
-        void TakeTest(ITestPaper testpaper, string[] answers);
+        void TakeTest(TestPaper testpaper, string[] answers);
     }
 }
